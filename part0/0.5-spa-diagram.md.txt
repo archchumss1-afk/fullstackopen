@@ -1,0 +1,25 @@
+
+---
+
+### 📄 File 2: `0.5-spa-diagram.md`
+
+```md
+```mermaid
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: GET /spa
+    activate server
+    server-->>browser: HTML
+    deactivate server
+
+    browser->>server: GET spa.js
+    browser->>server: GET main.css
+
+    browser->>server: GET data.json
+    activate server
+    server-->>browser: Notes (JSON)
+    deactivate server
+
+    Note right of browser: Notes rendered without page reload
