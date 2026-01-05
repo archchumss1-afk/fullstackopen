@@ -1,0 +1,19 @@
+
+---
+
+### 📄 File 3: `0.6-new-note-spa-diagram.md`
+
+```md
+```mermaid
+sequenceDiagram
+    participant browser
+    participant server
+
+    Note right of browser: User submits a new note
+
+    browser->>server: POST /new_note_spa
+    activate server
+    server-->>browser: 201 Created (JSON)
+    deactivate server
+
+    Note right of browser: Browser updates UI using JavaScript
