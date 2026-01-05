@@ -1,3 +1,4 @@
+ HEAD
 
 ---
 
@@ -16,4 +17,4 @@ sequenceDiagram
     server-->>browser: 201 Created (JSON)
     deactivate server
 
-    Note right of browser: Browser updates UI using JavaScript
+    Note right of browser: Browser updates UI using  JavaSc    d74e73e9880d60a5374265a4b9eac9240900864c

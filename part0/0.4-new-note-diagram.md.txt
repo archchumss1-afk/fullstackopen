@@ -1,3 +1,4 @@
+HEAD
 ```mermaid
 sequenceDiagram
     participant browser
@@ -19,4 +20,4 @@ sequenceDiagram
     server-->>browser: Updated notes (JSON)
     deactivate server
 
-    Note right of browser: Browser renders updated notes
+    Note right of browser: Browser renders updated note d74e73e9880d60a5374265a4b9eac9240900864c
