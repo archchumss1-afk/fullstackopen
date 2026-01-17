@@ -1,5 +1,5 @@
 import Person from './Person'
-const Persons=({persons})=>{
+const Persons=({persons,deletePerson})=>{
     return(
       <div>
         {persons.map(person =>
@@ -7,6 +7,7 @@ const Persons=({persons})=>{
           key={person.id}
           name={person.name}
           number={person.number}
+          onDelete={()=>deletePerson(person.id)}
         />
         )}
      </div>
