@@ -4,6 +4,7 @@ import Filter from './components/Filter'
 import Personsform from './components/Personform'
 import Persons from './components/Persons'
 import personsService from './services/persons'
+import Notification  from './components/Notification'
 
 const App = () => {
 
@@ -12,6 +13,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNum,setNewNum]=useState('')
   const [filter,setFilter]=useState('')
+  const [notificationMessage,setNotificationMessage]=useState(null)
+  const [errorMessage,setErrorMessage]=useState(null)
   
   useEffect(()=>{
     personsService
@@ -43,13 +46,28 @@ const App = () => {
       .update(persons.find(p=>p.name===newName).id,{...persons.find(p=>p.name===newName),number:newNum})
       .then(returnedPerson=>{
         setPersons(persons.map(p=>p.name!==newName ? p : returnedPerson))
+        setNotificationMessage(`Updated ${newName}'s number`)
+          setTimeout(()=>{
+            setNotificationMessage(null)
+          },3000)
         setNewName('')
         setNewNum('')
       })
-    }
+      .catch(error=>{
+        setErrorMessage(`Information of ${newName} has already been removed from server`)
+        setTimeout(()=>{ 
+          setErrorMessage(null)
+        },5000)
+        setPersons(persons.filter(p=>p.name!==newName))
+      })
+    
+    
      // alert(`${newName} is already added to phonebook`)
       return
+
     }
+      }
+    
 
     const newdetail={
       name:newName,
@@ -59,7 +77,11 @@ const App = () => {
     .create(newdetail)
       .then(returnedPerson=>{
         setPersons(persons.concat(returnedPerson))
-        setNewName('')
+        setNotificationMessage(`Added ${newName}`)
+         setTimeout(()=>{
+          setNotificationMessage(null)
+      },5000)
+      setNewName('')
         setNewNum('')
       })
   }
@@ -82,6 +104,8 @@ const App = () => {
   return (
      <div>
         <h2>Phonebook</h2>
+        <Notification message={notificationMessage} type='success'/>
+        <Notification message={errorMessage} type='error'/>
 
           <Filter filter={filter} filterWork={filterWork}/>
     
