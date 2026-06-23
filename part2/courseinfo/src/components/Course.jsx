@@ -30,6 +30,7 @@ const Total=({parts})=>{
 }
 
 const Course =({course})=>{
+
     return(
         <div>
             <Header name={course.name}/>
