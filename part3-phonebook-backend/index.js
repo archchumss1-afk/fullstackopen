@@ -1,7 +1,17 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app =express()
 
 app.use(express.json())
+
+morgan.token('body',(request,response)=>{
+    if(request.method === 'POST'){
+        return JSON.stringify(request.body)
+    }
+    return ''
+})
+app.use(morgan(':method :url :status :res[content-Length] - :response-time ms :body'))
 
 let persons = [
     { 
@@ -46,6 +56,10 @@ app.get('/api/persons/:id',(request,response)=>{
         response.status(404).end()
     }
     
+})
+
+app.get('/', (request, response) => {
+  response.send('<h1>Welcome to the Phonebook Backend!</h1>')
 })
 
 app.delete('/api/persons/:id',(request, response) =>{
