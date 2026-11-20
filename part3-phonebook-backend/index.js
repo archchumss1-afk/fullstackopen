@@ -1,3 +1,6 @@
+require('dotenv').config()
+const Person =require('./models/person')
+
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
@@ -40,7 +43,16 @@ let persons = [
     }
 ]
 app.get('/api/persons', (request, response)=>{
-    response.json(persons)
+    Person.find({})
+    .then(persons => {
+        response.json(persons)
+    })
+    .catch(error =>{
+        console.error('Could not fetch contacts: ',error.name)
+        response.status(500).json({
+            error: 'Could not fetch contacts',
+        })
+    })
 })
 
 app.get('/info',(request, response) =>{
@@ -80,19 +92,21 @@ app.post('/api/persons',(request, response) =>{
         })
     }
 
-    const nameExists =persons.some(person => person.name === body.name)
-    if(nameExists){
-        return response.status(400).json({
-            error: 'name must be unique'
-        })
-    }
-    const newPerson ={
-        id: (Math.floor(Math.random()*1000000)).toString(),
-        name: body.name,
-        number: body.number
-    }
-    persons =persons.concat(newPerson)
-    response.json(newPerson)
+   const person =new Person({
+    name: body.name,
+    number: body.number,
+   })
+
+   person.save()
+   .then(savedPerson => {
+    response.json(savedPerson)
+   })
+   .catch(error =>{
+    console.error('Could not save contact :', error.name)
+    response.status(500).json({
+        error: 'Could not save contact',
+    })
+   })
 })
 const PORT = process.env.PORT || 3001
 app.listen(PORT, ()=>{
