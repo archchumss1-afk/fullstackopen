@@ -20,57 +20,37 @@ morgan.token('body',(request,response)=>{
 })
 app.use(morgan(':method :url :status :res[content-Length] - :response-time ms :body'))
 
-let persons = [
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-app.get('/api/persons', (request, response)=>{
+
+app.get('/api/persons', (request, response,next)=>{
     Person.find({})
     .then(persons => {
         response.json(persons)
     })
-    .catch(error =>{
-        console.error('Could not fetch contacts: ',error.name)
-        response.status(500).json({
-            error: 'Could not fetch contacts',
-        })
-    })
+    .catch(error => next(error))
 })
+ 
 
-app.get('/info',(request, response) =>{
-    const entriesCount = persons.length
+app.get('/info',(request, response,next) =>{
     const date = new Date()
-    response.send(
-        `<p>Phonebook has info for ${entriesCount} people</p><p>${date}</p>`
-    )
+    Person.countDocuments({})
+    .then(count => {
+        response.send(
+            `<p>Phonebook has info for ${count} people</p>
+            <p>${date}</p>`
+        )
+    })
+    .catch(error => next(error))
 })
 
-app.get('/api/persons/:id',(request,response)=>{
-    const id =request.params.id
-    const person =persons.find(person => person.id === id)
-    if(person){
-        response.json(person)
-    }else{
-        response.status(404).end()
-    }
+app.get('/api/persons/:id',(request,response,next)=>{
+   Person.findById(request.params.id)
+   .then(person => {
+     if(!person) {
+        return response.status(404).end()
+     }
+     response.json(person)
+   })
+   .catch(error => next(error))
     
 })
 
@@ -78,13 +58,15 @@ app.get('/', (request, response) => {
   response.send('<h1>Welcome to the Phonebook Backend!</h1>')
 })
 
-app.delete('/api/persons/:id',(request, response) =>{
-    const id= request.params.id
-    persons =persons.filter(person => person.id !== id)
-    response.status(204).end()
+app.delete('/api/persons/:id',(request, response,next) =>{
+    Person.findByIdAndDelete(request.params.id)
+    .then(()=>{
+        response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
-app.post('/api/persons',(request, response) =>{
+app.post('/api/persons',(request, response,next) =>{
     const body =request.body
     if(!body.name || !body.number){
         return response.status(400).json({
@@ -101,13 +83,39 @@ app.post('/api/persons',(request, response) =>{
    .then(savedPerson => {
     response.json(savedPerson)
    })
-   .catch(error =>{
-    console.error('Could not save contact :', error.name)
-    response.status(500).json({
-        error: 'Could not save contact',
-    })
-   })
+   .catch(error =>next(error))
 })
+
+app.put('/api/persons/:id',(request,response,next)=>{
+    const body =request.body
+
+    Person.findById(request.params.id)
+    .then(person =>{
+        if(!person){
+            return response.status(404).end()
+        }
+        person.number = body.number
+
+        return person.save().then(updatedPerson =>{
+            response.json(updatedPerson)
+        })
+    })
+    .catch(error =>next(error))
+})
+
+const errorHandler = (error, request, response, next) =>{
+    console.error(error.name)
+
+    if(error.name === 'CastError') {
+        return response.status(400).json({
+            error: 'Invalid contact ID',
+        })
+    }
+    next(error)
+}
+
+app.use(errorHandler)
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, ()=>{
     console.log(`Server running on port ${PORT}`)
