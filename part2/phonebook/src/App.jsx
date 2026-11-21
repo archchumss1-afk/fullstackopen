@@ -84,6 +84,14 @@ const App = () => {
       setNewName('')
         setNewNum('')
       })
+      .catch(error => {
+        setErrorMessage(
+          error.response?.data?.error || 'Could not add contact'
+        )
+        setTimeout(() =>{
+          setErrorMessage(null)
+        },5000)
+      })
   }
 
   const handleNumChange=(event)=>{
